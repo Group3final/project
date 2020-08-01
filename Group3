@@ -8,73 +8,73 @@
 void solveIK(const int& effectorId, const int& chainCount, const Cvector& target, Skeleton* skeleton)
 {
 
-if( (effectorId-chainCount) < 0)
-{
-Error::post("solveIK problem, chainCount exceeds available bones in chain, please decrease",50);
-return;
-}
-int i = 0;
-Bone* currentBone;
-Bone* parentToCurrent;
+   if( (effectorId-chainCount) < 0)
+   {
+      Error::post("solveIK problem, chainCount exceeds available bones in chain, please decrease",50);
+      return;
+   }
+   int i = 0;
+   Bone* currentBone;
+   Bone* parentToCurrent;
 
 
-vector<float> distances;
-for (i =0; i< effectorId; i++)
-{
-distances.push_back(skeleton->getLenghtBetween(i,i+1));
-}
+   vector<float> distances;
+   for (i =0; i< effectorId; i++)
+   {
+      distances.push_back(skeleton->getLenghtBetween(i,i+1));
+   }
 
-Bone*  root           = skeleton->getBone(effectorId-chainCount);
-Bone*  effector       = skeleton->getBone(effectorId);
-CVector originalRootPosition = root->getPosition();
+   Bone*  root           = skeleton->getBone(effectorId-chainCount);
+   Bone*  effector       = skeleton->getBone(effectorId);
+   CVector originalRootPosition = root->getPosition();
 
-effector->setPosition(target);
+   effector->setPosition(target);
 
 
-CVector direction;
-for(i = effectorId; i > effectorId-chainCount; i--)
-{
-currentBone       = skeleton->getBone(i);
-parentToCurrent   = currentBone->getParent();
-if( currentBone && parentToCurrent)
-{
- direction = parentToCurrent->getPosition()  -  currentBone->getPosition();
- direction.normalise();
+   CVector direction;
+   for(i = effectorId; i > effectorId-chainCount; i--)
+   {
+      currentBone       = skeleton->getBone(i);
+      parentToCurrent   = currentBone->getParent();
+      if( currentBone && parentToCurrent)
+      {
+          direction = parentToCurrent->getPosition()  -  currentBone->getPosition();
+          direction.normalise();
 
- parentToCurrent->setPosition(currentBone->getPosition() + direction*distances[i-1]);
-}
-else
-{
-Error::post("IK Stage 1: currentBone or parentBone is null ", 80);
-}
-}
-root->setPosition(originalRootPosition);
-Bone* childOfCurrent;
-for(i= effectorId-chainCount; i< (int)effectorId; i++)
-{
-currentBone     = skeleton->getBone(i);
-childOfCurrent  = skeleton->getBone(i+1);
-if(currentBone  && childOfCurrent)
-{
-direction = childOfcurrent->getPosition() - currentBone->getPosition();
-direction.normalise();
-childOfCurrent->setPosition(currentBone->getPosition()+direction*distances[i]);
-}
-else
-{
-Error::post("IK Stage2: CurrentBone or childOfCurrent is null" , 83);
-}
-}
-Bone* child = effector->getChild();
-if(child)
-{
-Cvector xoff = effector->getPosition() - child->getPosition();
-for(i=effectorId+1; i< (int)skeleton->size(); i++)
-{
-child = skeleton->getBone(i);
-child->setPosition(child->getPosition()+xoff);
-}
-}
+          parentToCurrent->setPosition(currentBone->getPosition() + direction*distances[i-1]);
+      }
+      else
+      {
+         Error::post("IK Stage 1: currentBone or parentBone is null ", 80);
+      }
+   }
+   root->setPosition(originalRootPosition);
+   Bone* childOfCurrent;
+   for(i= effectorId-chainCount; i< (int)effectorId; i++)
+   {
+      currentBone     = skeleton->getBone(i);
+      childOfCurrent  = skeleton->getBone(i+1);
+      if(currentBone  && childOfCurrent)
+      {
+         direction = childOfcurrent->getPosition() - currentBone->getPosition();
+         direction.normalise();
+         childOfCurrent->setPosition(currentBone->getPosition()+direction*distances[i]);
+      }
+      else
+      {
+         Error::post("IK Stage2: CurrentBone or childOfCurrent is null" , 83);
+      }
+   }
+   Bone* child = effector->getChild();
+   if(child)
+   {
+      Cvector xoff = effector->getPosition() - child->getPosition();
+      for(i=effectorId+1; i< (int)skeleton->size(); i++)
+      {
+         child = skeleton->getBone(i);
+         child->setPosition(child->getPosition()+xoff);
+      }
+   }
 }
 Skeleton ikSkeleton;
 Skeleton *ptrActiveSkeleton
@@ -90,127 +90,127 @@ float roty=0,roty2=0;
 
 void scene(int cameraId)
 {
-ptrActiveSkeleton->render();
+   ptrActiveSkeleton->render();
 
-int dx,dy;
-if(GL::getMickey(dx,dy))
-{
-CVector mouseWorldPosition,worldRay;
-CVector selectionLocation = ptrActiveSkeleton->getBone(2)->getPosition();
-worlRay = GL::unproject(GL::mouseX,GL::mouseY,mouseWorldPosition);
+   int dx,dy;
+   if(GL::getMickey(dx,dy))
+   {
+      CVector mouseWorldPosition,worldRay;
+      CVector selectionLocation = ptrActiveSkeleton->getBone(2)->getPosition();
+      worlRay = GL::unproject(GL::mouseX,GL::mouseY,mouseWorldPosition);
 
-float distanceToSelection = (mouseWorldPosition-selectionLocation).getLength();
+      float distanceToSelection = (mouseWorldPosition-selectionLocation).getLength();
 
-CVector cursorNearSelection = mouseWorldPosition+worldRay*distanceToSelection;
-CVector vecOffset = cursorNearSelection - selectionLocation;
+      CVector cursorNearSelection = mouseWorldPosition+worldRay*distanceToSelection;
+      CVector vecOffset = cursorNearSelection - selectionLocation;
 
-ikTarget = ptrActiveSkeleton->getBone(2)->getPosition()+vecOffset;
-}
-if(GL::mouseState==0)
-{
-ray = GL::unproject(GL::mouseX,GL::mouseY,rayPosition);
-}
-glDisable(GL_LIGHTING);
-glColor3f(1,1,0);
-GL::point(ikTarget,5);
-GL::renderGrid();
-glEnable(GL_LIGHTING);
+      ikTarget = ptrActiveSkeleton->getBone(2)->getPosition()+vecOffset;
+   }
+   if(GL::mouseState==0)
+   {
+      ray = GL::unproject(GL::mouseX,GL::mouseY,rayPosition);
+   }
+   glDisable(GL_LIGHTING);
+   glColor3f(1,1,0);
+   GL::point(ikTarget,5);
+   GL::renderGrid();
+   glEnable(GL_LIGHTING);
 }
 
 
 void render()
 {
-glColor3f(1,1,1);
-glClear( GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-glViewport( 0, 0, GL::windowWidth, GL::windowHeight);
-glMatrixMode(GL_MODELVIEW);
-glLoadIdentity();
+   glColor3f(1,1,1);
+   glClear( GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+   glViewport( 0, 0, GL::windowWidth, GL::windowHeight);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
 
-glPushMatrix();
+   glPushMatrix();
 
-glTranslatef  ( tx    ,  -ty ,  -zoom ) ;
-glRotatef     ( rotx  ,  1   , 0,  0 )  ;
-glRotatef     ( roty  ,  0   , 1, 0)    ;
+   glTranslatef  ( tx    ,  -ty ,  -zoom ) ;
+   glRotatef     ( rotx  ,  1   , 0,  0 )  ;
+   glRotatef     ( roty  ,  0   , 1, 0)    ;
 
 
-scene(1);
-CVector p0;// confusion-------------------
-if(GL::isKeyPressed(' '))
-{
-solveIK(2, 2, ikTarget,ptrActiveSkeleton);
-}
-if(GL::isKeyPressed('B'))
-{
-solveIK(5, 2,ikTarget,ptrActiveSkeleton);
-}
-GL::arrow(rayPosition+ray*3,ray,0,5,1,1,1);
-glColor3f(1,1,1);
+   scene(1);
+   CVector p0;// confusion-------------------
+   if(GL::isKeyPressed(' '))
+   {
+      solveIK(2, 2, ikTarget,ptrActiveSkeleton);
+   }
+   if(GL::isKeyPressed('B'))
+   {
+      solveIK(5, 2,ikTarget,ptrActiveSkeleton);
+   }
+   GL::arrow(rayPosition+ray*3,ray,0,5,1,1,1);
+   glColor3f(1,1,1);
 
-GL::print(10,10,(char*)"Inverse kinematics in C++",zoom);
-Colorc c = {0,0,0};
-GL::pickColor(GL::mouseX,GL::mouseY,&c);
-glPopMatrix();
-glPopMatrix();
-glfwSwapBuffers();
+   GL::print(10,10,(char*)"Inverse kinematics in C++",zoom);
+   Colorc c = {0,0,0};
+   GL::pickColor(GL::mouseX,GL::mouseY,&c);
+   glPopMatrix();
+   glPopMatrix();
+   glfwSwapBuffers();
 }
 void processInput()
 {
-float speed=0.34;
-if(GL::isKeyPressed('Z')) zoom += 0.4;
-if(GL::isKeyPressed('X')) zoom -= 0.4;
-if(GL::isKeyPressed('Q')) rotx += speed;
-if(GL::isKeyPressed('W')) rotx -= speed;
-if(GL::isKeyPressed('A')) roty += speed;
-if(GL::isKeyPressed('S')) roty -= speed;
-if(GL::isKeyPressed('D')) tx +=  speed;
-if(GL::isKeyPressed('F')) tx -=  speed;
-if(GL::isKeyPressed('G')) ty += speed;
-if(GL::isKeyPressed('H')) ty -= speed;
+   float speed=0.34;
+   if(GL::isKeyPressed('Z')) zoom += 0.4;
+   if(GL::isKeyPressed('X')) zoom -= 0.4;
+   if(GL::isKeyPressed('Q')) rotx += speed;
+   if(GL::isKeyPressed('W')) rotx -= speed;
+   if(GL::isKeyPressed('A')) roty += speed;
+   if(GL::isKeyPressed('S')) roty -= speed;
+   if(GL::isKeyPressed('D')) tx +=  speed;
+   if(GL::isKeyPressed('F')) tx -=  speed;
+   if(GL::isKeyPressed('G')) ty += speed;
+   if(GL::isKeyPressed('H')) ty -= speed;
 
-if(GL::isKeyPressed('I'))
-{
-}
+   if(GL::isKeyPressed('I'))
+   {
+   }
 
-if(GL::isKeyPressed('R')){
-ptrActiveSkeleton->resetPosition();
-}
+   if(GL::isKeyPressed('R')){
+      ptrActiveSkeleton->resetPosition();
+   }
 }
 int main(int n,char** a){
-createGLWindow();
+   createGLWindow();
 
-unsigned int id = GL::loadTgaTextureFile("Font.tga");
-GL::buildFont(id);
-ikSkeleton.addBone(0,0,0);
-ikSkeleton.addBone(0,3,0);
-ikSkeleton.addBone(0,3,0);
-ikSkeleton.addBone(0,2,0);
-ikSkeleton.addBone(0,2,0);
-ikSkeleton.addBone(0,2,0);
-ikSkeleton.addBone(0,2,0);
-ikSkeleton.addBone(0,2,0);
-ikSkeleton.addBone(0,4,0);
-ikSkeleton.addBone(0,2,0);
+   unsigned int id = GL::loadTgaTextureFile("Font.tga");
+   GL::buildFont(id);
+   ikSkeleton.addBone(0,0,0);
+   ikSkeleton.addBone(0,3,0);
+   ikSkeleton.addBone(0,3,0);
+   ikSkeleton.addBone(0,2,0);
+   ikSkeleton.addBone(0,2,0);
+   ikSkeleton.addBone(0,2,0);
+   ikSkeleton.addBone(0,2,0);
+   ikSkeleton.addBone(0,2,0);
+   ikSkeleton.addBone(0,4,0);
+   ikSkeleton.addBone(0,2,0);
 
-ikSkeleton.setChild(8,9);
-ikSkeleton.setChild(7,8);
-ikSkeleton.setChild(6,7);
-ikSkeleton.setChild(5,6);
-ikSkeleton.setChild(4,5);
-ikSkeleton.setChild(3,4);
-ikSkeleton.setChild(2,3);
-ikSkeleton.setChild(1,2);
-ikSkeleton.setChild(0,1);
+   ikSkeleton.setChild(8,9);
+   ikSkeleton.setChild(7,8);
+   ikSkeleton.setChild(6,7);
+   ikSkeleton.setChild(5,6);
+   ikSkeleton.setChild(4,5);
+   ikSkeleton.setChild(3,4);
+   ikSkeleton.setChild(2,3);
+   ikSkeleton.setChild(1,2);
+   ikSkeleton.setChild(0,1);
 
-ikSkeleton.resetPosition();
-ikSkeleton.resetOrientation();
-ikSleleton.getBone(0)->createRotation(CVector(1,0,0),DegreesToRadians(20));
-ikSkeleton.applyRotationOf(0);
-ikSkeleton.getBone(ikSkeleton.size()-1)->setColor(1,0,0);
-ptrActiveSkeleton = &ikSkeleton;
+   ikSkeleton.resetPosition();
+   ikSkeleton.resetOrientation();
+   ikSleleton.getBone(0)->createRotation(CVector(1,0,0),DegreesToRadians(20));
+   ikSkeleton.applyRotationOf(0);
+   ikSkeleton.getBone(ikSkeleton.size()-1)->setColor(1,0,0);
+   ptrActiveSkeleton = &ikSkeleton;
 
-while(GL::isRunning()){
-processInput();
-render();
-}
-return 0;
+   while(GL::isRunning()){
+      processInput();
+      render();
+   }
+   return 0;
 }
